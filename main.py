@@ -8,8 +8,9 @@ def get_user_option():
         user_option = input("\nSelect the analytics you would like visualized by entering 1, 2 or 3:\n"
                             "   1) Total View Count\n"
                             "   2) Subscriber Count\n"
-                            "   3) Video Upload Count\n") 
-        if user_option in ['1', '2', '3']:
+                            "   3) Video Upload Count\n"
+                            "   4) QUIT\n") 
+        if user_option in ['1', '2', '3', '4']:
             return int(user_option)
         else:
             print("Invalid selection. Please enter the option 1, 2 or 3\n")
@@ -24,6 +25,7 @@ def get_stats(youtube, usernames, option):
         )
         response = request.execute()
 
+        # NOTE FOR LATER: ADD OPTION FOR ALL 3
         for item in response.get('items', []):
             if option == 1:
                 data = {
@@ -51,6 +53,7 @@ api_key = input("Please enter your API Key\n")
 
 api_service_name = "youtube"
 api_version = "v3"
+
 # Get credentials and create an API client
 youtube = build(api_service_name, api_version, developerKey=api_key)
 
@@ -63,5 +66,13 @@ if len(channels) < 1:
     print("No usernames were provided. Please provide a list valid usernames seperated by a single space.\n")
     sys.exit(1)
 
-user_option = get_user_option()
-channel_analytics = get_stats(youtube,channels,user_option)
+user_option = 0
+
+while user_option != 4:
+    user_option = get_user_option()
+    channel_analytics = get_stats(youtube,channels,user_option)
+    print(channel_analytics)
+
+
+
+    
