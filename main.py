@@ -89,6 +89,7 @@ def get_trend_stats(youtube, usernames, option, retrieved, ids):
             print("TBD")
 
 def main():
+    #MAIN CODE
     api_key = input("Please enter your API Key\n")
     if not check_api_key(api_key):
         print("Invalid API Key. Exiting program.")
