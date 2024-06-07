@@ -29,7 +29,14 @@ def get_user_option():
                             "   6) Comment Count Trend\n"
                             "   7) QUIT\n") 
         if user_option in ['1', '2', '3', '4', '5', '6', '7']:
-            return int(user_option)
+            if user_option in ['4', '5', '6']:
+                while True:
+                    num = input('\nHow many videos of the recent uploads would you like visualized for the trend? Pick a number between 1 - 50. \n')
+                    if num.isdigit() and int(num) > 0 and int(num) < 51:
+                        return int(user_option), int(num)
+                    else:
+                        print("Invalid input. Please enter a positive integer.")
+            return int(user_option), None
         else:
             print("Invalid selection. Please enter a number 1-7 corresponding to the options displayed. \n")
 
@@ -60,14 +67,29 @@ def get_simple_stats(youtube, usernames, option):
                     'Video Upload Count': item['statistics']['videoCount']
                 }
             requested_data.append(data)
-            
-    return pd.DataFrame(requested_data)
 
-def get_trend_stats(youtube, usernames, option, retrieved, ids):
-    requested_data = []
+    df = pd.DataFrame(requested_data)
+    df.index += 1
+    return df
 
-    #GET 'UPLOADS' PLAYLIST ID TO LOOK THROUGH 
-    if retrieved == False:
+def retrieve_video_ids(youtube, id, num_vids):
+    list_ids = []
+
+    request = youtube.playlistItems().list(
+        part="snippet, contentDetails",
+        playlistId=id,
+        maxResults=num_vids
+    )
+    response = request.execute()
+
+    for item in response['items']:
+        list_ids.append(item['contentDetails']['videoId'])
+    
+    return list_ids
+
+def get_trend_stats(youtube, usernames, option, retrieved, ids, list_videoids, num_vids):
+    # IF FIRST ITERATION, AND DATA HAS NEVER BEEN CALCULATED, STORE IN DICTIONARY
+    if not retrieved:
         for username in usernames:
             request = youtube.channels().list(
                 part="contentDetails",
@@ -78,18 +100,56 @@ def get_trend_stats(youtube, usernames, option, retrieved, ids):
             for item in response.get('items', []):
                 x = item['contentDetails']['relatedPlaylists']['uploads']
                 ids.append(x)
+
+        for string_id in ids:
+            request = youtube.playlists().list(
+                part="snippet, contentDetails",
+                id=string_id
+            )
+            response = request.execute()
+
+            videos_list = retrieve_video_ids(youtube, string_id, num_vids)
+            list_videoids[string_id] = videos_list
     
-    #IF PLAYLIST IDS WERE ALREADY STORED FROM A PREVIOUS REQUEST
-    else:
-        if option == 4:
-            print("TBD")
-        elif option == 5:
-            print("TBD") 
-        else:
-            print("TBD")
+    trend_data = []
+
+    for id in ids:
+        request = youtube.videos().list(
+            part="snippet,statistics",
+            id=','.join(list_videoids[id][0:num_vids])
+        )
+        response = request.execute()
+
+        for vid in response['items']:
+            if option == 4:
+                data = {
+                    'Channel': vid['snippet']['channelTitle'],
+                    'Video ID': vid['id'],
+                    'Video Title': vid['snippet']['title'],
+                    'View Count': vid['statistics']['viewCount']
+                }
+            elif option == 5:
+                data = {
+                    'Channel': vid['snippet']['channelTitle'],
+                    'Video ID': vid['id'],
+                    'Video Title': vid['snippet']['title'],
+                    'Like Count': vid['statistics']['likeCount']
+                }
+            elif option == 6:
+                data = {
+                    'Channel': vid['snippet']['channelTitle'],
+                    'Video ID': vid['id'],
+                    'Video Title': vid['snippet']['title'],
+                    'Comment Count': vid['statistics']['commentCount']
+                }
+            trend_data.append(data)
+    
+    df = pd.DataFrame(trend_data)
+    df.index += 1
+    return df
 
 def main():
-    #MAIN CODE
+    # MAIN CODE
     api_key = input("Please enter your API Key\n")
     if not check_api_key(api_key):
         print("Invalid API Key. Exiting program.")
@@ -109,10 +169,11 @@ def main():
         sys.exit(1)
 
     playlist_ids = []
-    retrived_playlist_ids = False
+    retrieved_playlist_ids = False
+    playlist_to_videoids = {}
 
     while True:
-        user_option = get_user_option()
+        user_option, numvids = get_user_option()
         if user_option == 7:
             break
 
@@ -120,10 +181,10 @@ def main():
             channel_analytics = get_simple_stats(youtube, channels, user_option)
             print(channel_analytics)
         else:
-            trend_data = get_trend_stats(youtube, channels, user_option,retrived_playlist_ids, playlist_ids)
-            retrived_playlist_ids = True
-    
-    print(playlist_ids)
+            trend_data = get_trend_stats(youtube, channels, user_option, retrieved_playlist_ids, playlist_ids, playlist_to_videoids, numvids)
+            retrieved_playlist_ids = True
+            print(trend_data)
+
     print("\n----------Data Visualization Complete!----------\n")
 
 if __name__ == "__main__":
