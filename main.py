@@ -128,6 +128,7 @@ def get_trend_stats(youtube, usernames, option, retrieved, ids, list_videoids, n
                     'Video Title': vid['snippet']['title'],
                     'View Count': vid['statistics']['viewCount']
                 }
+            #this is a comment
             elif option == 5:
                 data = {
                     'Channel': vid['snippet']['channelTitle'],
