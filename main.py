@@ -3,6 +3,8 @@ import sys
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 import json
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 def check_api_key(api_key):
     try:
@@ -128,7 +130,6 @@ def get_trend_stats(youtube, usernames, option, retrieved, ids, list_videoids, n
                     'Video Title': vid['snippet']['title'],
                     'View Count': vid['statistics']['viewCount']
                 }
-            #this is a comment
             elif option == 5:
                 data = {
                     'Channel': vid['snippet']['channelTitle'],
@@ -149,9 +150,18 @@ def get_trend_stats(youtube, usernames, option, retrieved, ids, list_videoids, n
     df.index += 1
     return df
 
+def trend_data_preprocessing(dfs, option):
+    if option == 4:
+        dfs['View Count'] = dfs['View Count'].apply(pd.to_numeric, errors='coerce')
+    elif option == 5:
+        dfs['Like Count'] = dfs['Like Count'].apply(pd.to_numeric, errors='coerce')
+    elif option == 6:
+        dfs['Comment Count'] = dfs['Comment Count'].apply(pd.to_numeric, errors='coerce')
+    return dfs
+
 def main():
     # MAIN CODE
-    api_key = input("Please enter your API Key\n")
+    api_key = input("----------Welcome----------\nPlease enter your API Key\n")
     if not check_api_key(api_key):
         print("Invalid API Key. Exiting program.")
         sys.exit(1)
@@ -178,15 +188,51 @@ def main():
         if user_option == 7:
             break
 
-        if user_option in [1, 2, 3]:
-            channel_analytics = get_simple_stats(youtube, channels, user_option)
-            print(channel_analytics)
+        if user_option == 1:
+            channel_analytics = get_simple_stats(youtube, channels, 1)
+            channel_analytics['Total View Count'] = channel_analytics['Total View Count'].apply(pd.to_numeric, errors = 'coerce')
+            channel_analytics = channel_analytics.sort_values('Total View Count', ascending=False)
+            plt.figure(figsize=(10, 6))
+            ax = sns.barplot(x='Total View Count', y='Channel Name', data=channel_analytics)
+            ax.set_title('Channels by Total View Count')
+            ax.set_xlabel('Total View Count')
+            ax.set_ylabel('Channel Name')
+            plt.show()
+        
+        elif user_option == 2:
+            channel_analytics = get_simple_stats(youtube, channels, 2)
+            channel_analytics['Subscriber Count'] = channel_analytics['Subscriber Count'].apply(pd.to_numeric, errors = 'coerce')
+            channel_analytics = channel_analytics.sort_values('Subscriber Count', ascending=False)
+            plt.figure(figsize=(10, 6))
+            ax = sns.barplot(x='Subscriber Count', y='Channel Name', data=channel_analytics)
+            ax.set_title('Channels by Subscriber Count')
+            ax.set_xlabel('Subscriber Count')
+            ax.set_ylabel('Channel Name')
+            plt.show()
+
+        elif user_option == 3:
+            channel_analytics = get_simple_stats(youtube, channels, 3)
+            channel_analytics['Video Upload Count'] = channel_analytics['Video Upload Count'].apply(pd.to_numeric, errors = 'coerce')
+            channel_analytics = channel_analytics.sort_values('Video Upload Count', ascending=False)
+            plt.figure(figsize=(10, 6))
+            ax = sns.barplot(x='Video Upload Count', y='Channel Name', data=channel_analytics)
+            ax.set_title('Channels by Video Upload Count')
+            ax.set_xlabel('Video Upload Count')
+            ax.set_ylabel('Channel Name')
+            plt.show()
+
         else:
             trend_data = get_trend_stats(youtube, channels, user_option, retrieved_playlist_ids, playlist_ids, playlist_to_videoids, numvids)
+            trend_data = trend_data_preprocessing(trend_data, user_option)
             retrieved_playlist_ids = True
+
+            # Add trend visualization here
+
+            print(trend_data.dtypes)
             print(trend_data)
 
     print("\n----------Data Visualization Complete!----------\n")
 
 if __name__ == "__main__":
     main()
+
