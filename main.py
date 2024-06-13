@@ -254,7 +254,7 @@ def main():
                 # Ensure the slice doesn't go beyond the length of the DataFrame
                 slice_end = min(i + numvids, len(trend_data))
                 sliced_data = trend_data[i:slice_end]
-                channel_name = sliced_data.iloc[0]['Channel']  # Assuming 'Channel' column contains channel names
+                channel_name = sliced_data.iloc[0]['Channel']  
 
                 plt.figure(figsize=(15, 10))
                 ax = sns.barplot(x='Video Title', y='View Count', data=sliced_data)
@@ -278,7 +278,7 @@ def main():
                 # Ensure the slice doesn't go beyond the length of the DataFrame
                 slice_end = min(i + numvids, len(trend_data))
                 sliced_data = trend_data[i:slice_end]
-                channel_name = sliced_data.iloc[0]['Channel']  # Assuming 'Channel' column contains channel names
+                channel_name = sliced_data.iloc[0]['Channel']  
 
                 plt.figure(figsize=(15, 10))
                 ax = sns.barplot(x='Video Title', y='Like Count', data=sliced_data)
@@ -300,7 +300,7 @@ def main():
                 # Ensure the slice doesn't go beyond the length of the DataFrame
                 slice_end = min(i + numvids, len(trend_data))
                 sliced_data = trend_data[i:slice_end]
-                channel_name = sliced_data.iloc[0]['Channel']  # Assuming 'Channel' column contains channel names
+                channel_name = sliced_data.iloc[0]['Channel'] 
 
                 plt.figure(figsize=(15, 10))
                 ax = sns.barplot(x='Video Title', y='Comment Count', data=sliced_data)
