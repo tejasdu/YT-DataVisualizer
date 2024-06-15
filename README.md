@@ -51,11 +51,11 @@ Creating your own API Key
         Click "Copy" to copy your API key. You will use this key in your YouTube Channel Analytics Visualizer.
         
     - Step 4: Restrict Your API Key (Optional but Recommended)
-      Click on the API key name in the Credentials page to open its settings.
-      Restrict the key:
-      Under "API restrictions", select "Restrict key".
-      Select "YouTube Data API v3" from the list.
-      Click "Save" to apply the restrictions.
+        Click on the API key name in the Credentials page to open its settings.
+        Restrict the key:
+        Under "API restrictions", select "Restrict key".
+        Select "YouTube Data API v3" from the list.
+        Click "Save" to apply the restrictions.
 ----------------------------------------
 KNOWN ISSUES
 ----------------------------------------
