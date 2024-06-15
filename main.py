@@ -5,8 +5,8 @@ from googleapiclient.errors import HttpError
 import json
 import seaborn as sns
 import matplotlib.pyplot as plt
-import textwrap
 import isodate
+import textwrap
 
 def check_api_key(api_key):
     try:
@@ -188,7 +188,7 @@ def main():
     api_version = "v3"
     youtube = build(api_service_name, api_version, developerKey=api_key)
 
-    username_list = input("\nPlease enter the usernames of the channels you would like to analyze, separated by a single space between each one.MAKE SURE THE USERNAMES ARE"
+    username_list = input("\nPlease enter the usernames of the channels you would like to analyze, separated by a single space between each one. MAKE SURE THE USERNAMES ARE"
                           " SPELLED CORRECTLY.\nThere are over 114 million youtube channels, so this program will not be able to differentiate between whether the user inputted channels have a typo or are valid usernames:\n")
 
     channels = username_list.split()
@@ -208,109 +208,60 @@ def main():
 
         if user_option == 1:
             channel_analytics = get_simple_stats(youtube, channels, 1)
-            channel_analytics['Total View Count'] = channel_analytics['Total View Count'].apply(pd.to_numeric, errors='coerce')
+            channel_analytics['Total View Count'] = channel_analytics['Total View Count'].apply(pd.to_numeric, errors = 'coerce')
             channel_analytics = channel_analytics.sort_values('Total View Count', ascending=False)
-            for index, row in channel_analytics.iterrows():
-                channel_name = row['Channel Name']
-                plt.figure(figsize=(15, 10))
-                ax = sns.barplot(x='Total View Count', y='Channel Name', data=channel_analytics)
-                ax.set_title(f'Channels by Total View Count - {channel_name}')
-                ax.set_xlabel('Total View Count')
-                ax.set_ylabel('Channel Name')
-                plt.show()
-
+            plt.figure(figsize=(15, 10))
+            ax = sns.barplot(x='Total View Count', y='Channel Name', data=channel_analytics)
+            ax.set_title('Channels by Total View Count')
+            ax.set_xlabel('Total View Count')
+            ax.set_ylabel('Channel Name')
+            plt.show()
+        
         elif user_option == 2:
             channel_analytics = get_simple_stats(youtube, channels, 2)
-            channel_analytics['Subscriber Count'] = channel_analytics['Subscriber Count'].apply(pd.to_numeric, errors='coerce')
+            channel_analytics['Subscriber Count'] = channel_analytics['Subscriber Count'].apply(pd.to_numeric, errors = 'coerce')
             channel_analytics = channel_analytics.sort_values('Subscriber Count', ascending=False)
-            for index, row in channel_analytics.iterrows():
-                channel_name = row['Channel Name']
-                plt.figure(figsize=(15, 10))
-                ax = sns.barplot(x='Subscriber Count', y='Channel Name', data=channel_analytics)
-                ax.set_title(f'Channels by Subscriber Count - {channel_name}')
-                ax.set_xlabel('Subscriber Count')
-                ax.set_ylabel('Channel Name')
-                plt.show()
+            plt.figure(figsize=(15, 10))
+            ax = sns.barplot(x='Subscriber Count', y='Channel Name', data=channel_analytics)
+            ax.set_title('Channels by Subscriber Count')
+            ax.set_xlabel('Subscriber Count')
+            ax.set_ylabel('Channel Name')
+            plt.show()
 
         elif user_option == 3:
             channel_analytics = get_simple_stats(youtube, channels, 3)
-            channel_analytics['Video Upload Count'] = channel_analytics['Video Upload Count'].apply(pd.to_numeric, errors='coerce')
+            channel_analytics['Video Upload Count'] = channel_analytics['Video Upload Count'].apply(pd.to_numeric, errors = 'coerce')
             channel_analytics = channel_analytics.sort_values('Video Upload Count', ascending=False)
-            for index, row in channel_analytics.iterrows():
-                channel_name = row['Channel Name']
-                plt.figure(figsize=(15, 10))
-                ax = sns.barplot(x='Video Upload Count', y='Channel Name', data=channel_analytics)
-                ax.set_title(f'Channels by Video Upload Count - {channel_name}')
-                ax.set_xlabel('Video Upload Count')
-                ax.set_ylabel('Channel Name')
-                plt.show()
-
-        elif user_option == 4:
+            plt.figure(figsize=(15, 10))
+            ax = sns.barplot(x='Video Upload Count', y='Channel Name', data=channel_analytics)
+            ax.set_title('Channels by Video Upload Count')
+            ax.set_xlabel('Video Upload Count')
+            ax.set_ylabel('Channel Name')
+            plt.show()
+        
+        elif user_option in [4, 5, 6]:
             trend_data = get_trend_stats(youtube, channels, user_option, retrieved_playlist_ids, playlist_ids, playlist_to_videoids, numvids)
+            trend_data = trend_data_preprocessing(trend_data, user_option)
             retrieved_playlist_ids = True
-            trend_data['View Count'] = trend_data['View Count'].apply(pd.to_numeric, errors='coerce')
+
+            metric = 'View Count' if user_option == 4 else 'Like Count' if user_option == 5 else 'Comment Count'
 
             for i in range(0, len(trend_data), numvids):
-                # Ensure the slice doesn't go beyond the length of the DataFrame
                 slice_end = min(i + numvids, len(trend_data))
                 sliced_data = trend_data[i:slice_end]
-                channel_name = sliced_data.iloc[0]['Channel']  
+                channel_name = sliced_data.iloc[0]['Channel']
 
-                plt.figure(figsize=(15, 10))
-                ax = sns.barplot(x='Video Title', y='View Count', data=sliced_data)
-                ax.set_title(f'Latest Videos by View Count - {channel_name}')
+                plt.figure(figsize=(20, 10))  # Increase figure width
+                ax = sns.barplot(x='Video Title', y=metric, data=sliced_data)
+                ax.set_title(f'Latest Videos by {metric} - {channel_name}')
                 ax.set_xlabel('Video Title')
-                ax.set_ylabel('View Count')
+                ax.set_ylabel(metric)
 
-                plt.xticks(rotation=0, ha='right', fontsize=10)
-                # Wrap long titles
-                ax.set_xticklabels([textwrap.fill(label.get_text(), width=20) for label in ax.get_xticklabels()])
-                
-                plt.tight_layout() 
-                plt.show()
+                plt.xticks(rotation=45, ha='right', fontsize=10)
+                ax.set_xticklabels([textwrap.fill(label.get_text(), width=30) for label in ax.get_xticklabels()])
 
-        elif user_option == 5:
-            trend_data = get_trend_stats(youtube, channels, user_option, retrieved_playlist_ids, playlist_ids, playlist_to_videoids, numvids)
-            retrieved_playlist_ids = True
-            trend_data['Like Count'] = trend_data['Like Count'].apply(pd.to_numeric, errors='coerce')
+                plt.tight_layout()  # Ensure everything fits without overlapping
 
-            for i in range(0, len(trend_data), numvids):
-                # Ensure the slice doesn't go beyond the length of the DataFrame
-                slice_end = min(i + numvids, len(trend_data))
-                sliced_data = trend_data[i:slice_end]
-                channel_name = sliced_data.iloc[0]['Channel']  
-
-                plt.figure(figsize=(15, 10))
-                ax = sns.barplot(x='Video Title', y='Like Count', data=sliced_data)
-                ax.set_title(f'Latest Videos by Like Count - {channel_name}')
-                ax.set_xlabel('Video Title')
-                ax.set_ylabel('Like Count')
-
-                plt.xticks(rotation=0, ha='right', fontsize=10)
-                # Wrap long titles
-                ax.set_xticklabels([textwrap.fill(label.get_text(), width=20) for label in ax.get_xticklabels()])
-                plt.show()
-
-        else:
-            trend_data = get_trend_stats(youtube, channels, user_option, retrieved_playlist_ids, playlist_ids, playlist_to_videoids, numvids)
-            retrieved_playlist_ids = True
-            trend_data['Comment Count'] = trend_data['Comment Count'].apply(pd.to_numeric, errors='coerce')
-
-            for i in range(0, len(trend_data), numvids):
-                # Ensure the slice doesn't go beyond the length of the DataFrame
-                slice_end = min(i + numvids, len(trend_data))
-                sliced_data = trend_data[i:slice_end]
-                channel_name = sliced_data.iloc[0]['Channel'] 
-
-                plt.figure(figsize=(15, 10))
-                ax = sns.barplot(x='Video Title', y='Comment Count', data=sliced_data)
-                ax.set_title(f'Latest Videos by Comment Count - {channel_name}')
-                ax.set_xlabel('Video Title')
-                ax.set_ylabel('Comment Count')
-
-                plt.xticks(rotation=0, ha='right', fontsize=10)
-                # Wrap long titles
-                ax.set_xticklabels([textwrap.fill(label.get_text(), width=20) for label in ax.get_xticklabels()])
                 plt.show()
 
     print("\n----------Data Visualization Complete!----------\n")
