@@ -3,7 +3,7 @@ YOUTUBE CHANNEL ANALYTICS DATA VISUALIZER:
 A tool to visualize and analyze key metrics of YouTube channels.
 --------------------------------------------------------------------------------
 
-Welcome to the YouTube Channel Analytics Visualizer! This tool provides a comprehensive way to analyze and visualize the key metrics of YouTube channels. Users can gain insights into various statistics like total view counts, subscriber counts, video upload counts, and trends in view, like, and comment counts for the most recent uploads. This project leverages the YouTube Data API to fetch the required data and uses important packages such as numpy, pandas, seaborn and matplotlib for creating the visualizations.
+Welcome to the YouTube Channel Analytics Visualizer! This tool provides a comprehensive way to analyze and visualize the key metrics of YouTube channels. Users can gain insights into various statistics like total view counts, subscriber counts, video upload counts, and trends in view, like, and comment counts for the most recent uploads. This project leverages the Google for Developers tool, "YouTube Data API" to fetch the required data and uses important packages such as numpy, pandas, seaborn and matplotlib for creating the visualizations.
 
 ----------------------------------------
 INSTALLATION INSTRUCTIONS FOR USERS
