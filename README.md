@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
-YOUTUBE CHANNEL ANALYTICS DATA VISUALIZER
+YOUTUBE CHANNEL ANALYTICS DATA VISUALIZER: 
 A tool to visualize and analyze key metrics of YouTube channels.
 --------------------------------------------------------------------------------
 
