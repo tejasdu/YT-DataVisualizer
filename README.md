@@ -7,7 +7,7 @@ Youtube Studio has channel statistics and visualisations for ones own channel, b
 
 Welcome to the YouTube Channel Analytics Visualizer! This tool provides a comprehensive way to analyze and visualize the key metrics of YouTube channels. Users can gain insights into various statistics like total view counts, subscriber counts, video upload counts, and trends in view, like, and comment counts for the most recent uploads. This project leverages the Google for Developers tool, "YouTube Data API" to fetch the required data and uses important packages such as numpy, pandas, seaborn and matplotlib for creating the visualizations. 
 
-(https://github.com/tejasdu/YT-DataVisualizer/assets/113138177/0a50460e-7615-47ae-9c88-ada0a8f5febf)
+https://github.com/tejasdu/YT-DataVisualizer/assets/113138177/0a50460e-7615-47ae-9c88-ada0a8f5febf
 
 ----------------------------------------
 INSTALLATION INSTRUCTIONS FOR USERS
