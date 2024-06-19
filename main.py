@@ -44,7 +44,21 @@ def get_user_option():
         else:
             print("Invalid selection. Please enter a number 1-7 corresponding to the options displayed. \n")
 
-def get_simple_stats(youtube, usernames, option): 
+def get_simple_stats(youtube, usernames, option):
+    # Map option to the corresponding key in the API response
+    option_key_map = {
+        1: 'viewCount',
+        2: 'subscriberCount',
+        3: 'videoCount'
+    }
+    
+    # Map option to the corresponding label for the DataFrame
+    option_label_map = {
+        1: 'Total View Count',
+        2: 'Subscriber Count',
+        3: 'Video Upload Count'
+    }
+    
     requested_data = []
 
     for username in usernames:
@@ -55,26 +69,16 @@ def get_simple_stats(youtube, usernames, option):
         response = request.execute()
 
         for item in response.get('items', []):
-            if option == 1:
-                data = {
-                    'Channel Name': item['snippet']['title'],
-                    'Total View Count': item['statistics']['viewCount']
-                }
-            elif option == 2:
-                data = {
-                    'Channel Name': item['snippet']['title'],
-                    'Subscriber Count': item['statistics']['subscriberCount']
-                }
-            else:
-                data = {
-                    'Channel Name': item['snippet']['title'],
-                    'Video Upload Count': item['statistics']['videoCount']
-                }
+            data = {
+                'Channel Name': item['snippet']['title'],
+                option_label_map[option]: item['statistics'][option_key_map[option]]
+            }
             requested_data.append(data)
 
     df = pd.DataFrame(requested_data)
     df.index += 1
     return df
+
 
 def retrieve_video_ids(youtube, id, num_vids):
     list_ids = []
@@ -114,6 +118,18 @@ def retrieve_video_ids(youtube, id, num_vids):
     return list_ids
 
 def get_trend_stats(youtube, usernames, option, retrieved, ids, list_videoids, num_vids):
+    # Define the mapping between option and the corresponding keys/labels
+    option_key_map = {
+        4: 'viewCount',
+        5: 'likeCount',
+        6: 'commentCount'
+    }
+    option_label_map = {
+        4: 'View Count',
+        5: 'Like Count',
+        6: 'Comment Count'
+    }
+    
     # IF FIRST ITERATION, AND DATA HAS NEVER BEEN CALCULATED, STORE IN DICTIONARY
     if not retrieved:
         for username in usernames:
@@ -121,7 +137,7 @@ def get_trend_stats(youtube, usernames, option, retrieved, ids, list_videoids, n
                 part="contentDetails",
                 forUsername=username
             )
-            response = request.execute() 
+            response = request.execute()
 
             for item in response.get('items', []):
                 x = item['contentDetails']['relatedPlaylists']['uploads']
@@ -130,7 +146,7 @@ def get_trend_stats(youtube, usernames, option, retrieved, ids, list_videoids, n
         for string_id in ids:
             videos_list = retrieve_video_ids(youtube, string_id, num_vids)
             list_videoids[string_id] = videos_list
-    
+
     trend_data = []
 
     for id in ids:
@@ -141,29 +157,14 @@ def get_trend_stats(youtube, usernames, option, retrieved, ids, list_videoids, n
         response = request.execute()
 
         for vid in response['items']:
-            if option == 4:
-                data = {
-                    'Channel': vid['snippet']['channelTitle'],
-                    'Video ID': vid['id'],
-                    'Video Title': vid['snippet']['title'],
-                    'View Count': vid['statistics']['viewCount']
-                }
-            elif option == 5:
-                data = {
-                    'Channel': vid['snippet']['channelTitle'],
-                    'Video ID': vid['id'],
-                    'Video Title': vid['snippet']['title'],
-                    'Like Count': vid['statistics']['likeCount']
-                }
-            elif option == 6:
-                data = {
-                    'Channel': vid['snippet']['channelTitle'],
-                    'Video ID': vid['id'],
-                    'Video Title': vid['snippet']['title'],
-                    'Comment Count': vid['statistics']['commentCount']
-                }
+            data = {
+                'Channel': vid['snippet']['channelTitle'],
+                'Video ID': vid['id'],
+                'Video Title': vid['snippet']['title'],
+                option_label_map[option]: vid['statistics'][option_key_map[option]]
+            }
             trend_data.append(data)
-    
+
     df = pd.DataFrame(trend_data)
     df.index += 1
     return df
